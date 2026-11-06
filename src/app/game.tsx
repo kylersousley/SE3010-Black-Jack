@@ -1,20 +1,17 @@
+import * as Haptics from "expo-haptics";
+import { LinearGradient } from "expo-linear-gradient";
 import { useEffect, useState } from "react";
-import { ActivityIndicator, Pressable, StyleSheet, Text, View } from "react-native";
+import { StyleSheet, View } from "react-native";
 
 import { type Card, createDeck, drawCards, reshuffleDeck } from "@/api/deck";
-import { PlayingCard } from "@/components/playing-card";
-import { getOutcome, handTotal, type Outcome } from "@/utils/blackjack";
+import { COLORS } from "@/constants/theme";
+import { getOutcome, handTotal, type Outcome, type Phase } from "@/utils/blackjack";
+import ErrorState from "@/components/ErrorState";
+import LoadingState from "@/components/LoadingState";
+import PlayerTable from "@/components/PlayerTable";
+import ResultMessage from "@/components/ResultMessage";
+import CustomButton from "@/components/CustomButton";
 
-// "playing" = player's turn, "dealer" = dealer's turn, "done" = round over
-type Phase = "loading" | "playing" | "dealer" | "done";
-
-const OUTCOMES: Record<Outcome, string> = {
-  "player-win": "You won!",
-  "dealer-bust": "Dealer busted, you win!",
-  "dealer-win": "Dealer wins",
-  "player-bust": "You busted!",
-  "push": "You tied",
-}
 
 export default function GameScreen() {
   const [deckId, setDeckId] = useState<string | null>(null);
@@ -24,7 +21,8 @@ export default function GameScreen() {
   const [outcome, setOutcome] = useState<Outcome | null>(null);
   const [error, setError] = useState<string | null>(null);
 
-  // Create a deck once when the screen opens.
+  const background = [COLORS.feltLight, COLORS.feltDark] as const;
+
   useEffect(() => {
     createDeck()
       .then((id) => setDeckId(id))
@@ -36,32 +34,36 @@ export default function GameScreen() {
     }
   }, [deckId])
 
-  // Deals a fresh hand. Used for the first round and for "Deal Again".
   async function startRound() {
     if (deckId) {
       try {
         await reshuffleDeck(deckId)
         const cards = await drawCards(deckId, 4);
 
-        // Deal alternately, like a real table: player, dealer, player, dealer.
         setPlayerHand([cards[0], cards[2]]);
         setDealerHand([cards[1], cards[3]]);
 
-        setOutcome(null); // clear last round's result
-        setPhase("playing"); // player's turn: shows Hit/Stand, hides dealer's 2nd card
+        setOutcome(null);
+        setPhase("playing");
 
-        // Bonus (once handTotal works): if the player has 21 here, that's blackjack.
+        
       } catch (e) {
-        setError(String(e)); // e.g. no internet; shows the error screen
+        setError(String(e));
       }
     } else {
       return;
     }
   }
 
+  function dealAgain() {
+    Haptics.selectionAsync();
+    startRound();
+  }
+
   async function hit() {
     if (deckId) {
       try {
+        Haptics.selectionAsync();
         const card = await drawCards(deckId, 1)
         const newHand = [... playerHand, card[0]]
         setPlayerHand(newHand)
@@ -79,6 +81,7 @@ export default function GameScreen() {
   async function stand() {
     if (deckId) {
       try {
+        Haptics.selectionAsync();
         let dealer = [...dealerHand]
         while (handTotal(dealer) < 17) {
           const newCard = await drawCards(deckId, 1)
@@ -93,128 +96,58 @@ export default function GameScreen() {
     }
   }
 
-  // ---------- Rendering ----------
-
   if (error) {
     return (
-      <View style={styles.center}>
-        <Text style={styles.text}>Something went wrong: {error}</Text>
-      </View>
+      <ErrorState message="Something went wrong" error={error} />
     );
   }
 
   if (phase === "loading") {
     return (
-      <View style={styles.center}>
-        <ActivityIndicator size="large" color="white" />
-        <Text style={styles.text}>Shuffling...</Text>
-      </View>
+      <LoadingState message="Shuffling..." indicator_size="large" />
     );
   }
 
-  const hideDealerCard = phase === "playing";
-
   return (
-    <View style={styles.container}>
+    <LinearGradient
+      colors={background}
+      style={styles.container}
+    >
       {/* Dealer */}
-      <Text style={styles.label}>
-        Dealer {hideDealerCard ? "" : `(${handTotal(dealerHand)})`}
-      </Text>
-      <View style={styles.hand}>
-        {dealerHand.map((card, i) => (
-          <PlayingCard key={card.code} card={card} hidden={hideDealerCard && i === 1} />
-        ))}
-      </View>
+      <PlayerTable player="DEALER" hand={dealerHand} phase={phase}/>
 
       {/* Result message */}
-      <View style={styles.resultArea}>
-        {outcome ? (
-          <Text style={styles.text}>{OUTCOMES[outcome]}</Text>
-        ) : (
-          null
-        )}
-      </View>
+      <ResultMessage outcome={outcome} />
 
       {/* Player */}
-      <Text style={styles.label}>You ({handTotal(playerHand)})</Text>
-      <View style={styles.hand}>
-        {playerHand.map((card) => (
-          <PlayingCard key={card.code} card={card} />
-        ))}
-      </View>
+      <PlayerTable player="YOU" hand={playerHand} phase={phase} />
 
       {/* Controls */}
       <View style={styles.controls}>
         {phase === "playing" ? (
           <>
-            <Pressable style={styles.button} onPress={hit}>
-              <Text style={styles.buttonText}>Hit</Text>
-            </Pressable>
-            <Pressable style={styles.button} onPress={stand}>
-              <Text style={styles.buttonText}>Stand</Text>
-            </Pressable>
+          <CustomButton title="Hit" onPress={hit} />
+          <CustomButton title="Stand" onPress={stand} variant="outlined" />
           </>
         ) : (
-          <Pressable style={styles.button} onPress={startRound}>
-            <Text style={styles.buttonText}>Deal Again</Text>
-          </Pressable>
+          <CustomButton title="Deal Again" onPress={dealAgain} wide />
         )}
       </View>
-    </View>
+    </LinearGradient>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 16,
-    backgroundColor: "#0B6623",
-    justifyContent: "space-evenly",
-  },
-  center: {
-    flex: 1,
-    alignItems: "center",
-    justifyContent: "center",
-    backgroundColor: "#0B6623",
-    padding: 16,
-  },
-  text: {
-    color: "white",
-    fontSize: 16,
-    marginTop: 12,
-    textAlign: "center",
-  },
-  label: {
-    color: "white",
-    fontSize: 20,
-    fontWeight: "bold",
-    textAlign: "center",
-  },
-  hand: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    justifyContent: "center",
-    minHeight: 100,
-  },
-  resultArea: {
-    minHeight: 40,
-    alignItems: "center",
-    justifyContent: "center",
+    paddingHorizontal: 16,
+    paddingTop: 16,
+    paddingBottom: 40,
+    justifyContent: "space-between",
   },
   controls: {
     flexDirection: "row",
     justifyContent: "center",
     gap: 16,
-  },
-  button: {
-    backgroundColor: "#FFD700",
-    paddingVertical: 12,
-    paddingHorizontal: 32,
-    borderRadius: 10,
-  },
-  buttonText: {
-    fontSize: 18,
-    fontWeight: "bold",
-    color: "#222",
   },
 });

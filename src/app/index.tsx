@@ -1,19 +1,32 @@
-import { Link } from "expo-router";
-import { Pressable, StyleSheet, Text, View } from "react-native";
+import * as Haptics from "expo-haptics";
+import { LinearGradient } from "expo-linear-gradient";
+import { useRouter } from "expo-router";
+import { StyleSheet, Text, View } from "react-native";
+
+import { COLORS } from "@/constants/theme";
+import CustomButton from "@/components/CustomButton";
 
 export default function HomeScreen() {
-  return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Blackjack</Text>
-      <Text style={styles.subtitle}>Get as close to 21 as you can without going over.</Text>
+  const router = useRouter();
 
-      {/* Link + asChild lets the Pressable act as the navigation trigger */}
-      <Link href="/game" asChild>
-        <Pressable style={styles.button}>
-          <Text style={styles.buttonText}>Play</Text>
-        </Pressable>
-      </Link>
-    </View>
+  const startGame = () => {
+    Haptics.selectionAsync();
+    router.push("/game");
+  };
+
+  return (
+    <LinearGradient
+      colors={[COLORS.feltLight, COLORS.feltDark]}
+      style={styles.container}
+    >
+      <View style={styles.hero}>
+        <Text style={styles.suits}>♠ ♥ ♣ ♦</Text>
+        <Text style={styles.title}>BLACKJACK</Text>
+        <View style={styles.divider} />
+        <Text style={styles.subtitle}>Get as close to 21 as you can without going over.</Text>
+      </View>
+      <CustomButton title="Play" onPress={startGame} wide />
+    </LinearGradient>
   );
 }
 
@@ -22,30 +35,36 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: "center",
     justifyContent: "center",
-    padding: 24,
-    backgroundColor: "#0B6623", // felt green
+    paddingHorizontal: 24,
+  },
+  hero: {
+    alignItems: "center",
+    marginBottom: 48,
+  },
+  suits: {
+    fontSize: 28,
+    color: COLORS.gold,
+    letterSpacing: 8,
+    marginBottom: 12,
   },
   title: {
-    fontSize: 48,
-    fontWeight: "bold",
-    color: "white",
-    marginBottom: 8,
+    fontSize: 44,
+    fontWeight: "800",
+    color: COLORS.text,
+    letterSpacing: 4,
+  },
+  divider: {
+    width: 64,
+    height: 3,
+    borderRadius: 2,
+    backgroundColor: COLORS.gold,
+    marginVertical: 16,
   },
   subtitle: {
     fontSize: 16,
-    color: "#E0E0E0",
+    lineHeight: 22,
+    color: COLORS.textMuted,
     textAlign: "center",
-    marginBottom: 40,
-  },
-  button: {
-    backgroundColor: "#FFD700",
-    paddingVertical: 14,
-    paddingHorizontal: 48,
-    borderRadius: 12,
-  },
-  buttonText: {
-    fontSize: 20,
-    fontWeight: "bold",
-    color: "#222",
+    maxWidth: 280,
   },
 });

@@ -1,4 +1,3 @@
-// Pure game logic. There's no React or API code here, so it's easy to test.
 import type { Card } from "@/api/deck";
 
 const BLACK_JACK_VALUES: Record<string, number> = {
@@ -25,6 +24,8 @@ export function handTotal(hand: Card[]): number {
 }
 
 export type Outcome = "player-bust" | "dealer-bust" | "player-win" | "dealer-win" | "push";
+
+export type Phase = "loading" | "playing" | "dealer" | "done";
 
 export function getOutcome(playerHand: Card[], dealerHand: Card[]): Outcome {
   if (handTotal(playerHand) > 21) {

@@ -5,10 +5,9 @@ import type { Card } from "@/api/deck";
 
 type Props = {
   card: Card;
-  hidden?: boolean; // used for the dealer's face-down card
+  hidden?: boolean;
 };
 
-// The API serves a card-back image at this URL.
 const CARD_BACK = "https://deckofcardsapi.com/static/img/back.png";
 
 export function PlayingCard({ card, hidden = false }: Props) {
@@ -18,6 +17,7 @@ export function PlayingCard({ card, hidden = false }: Props) {
         source={{ uri: hidden ? CARD_BACK : card.image }}
         style={styles.image}
         contentFit="contain"
+        transition={200}
       />
     </View>
   );
@@ -25,10 +25,12 @@ export function PlayingCard({ card, hidden = false }: Props) {
 
 const styles = StyleSheet.create({
   wrapper: {
-    marginHorizontal: 4,
+    margin: 4,
+    borderRadius: 6,
   },
   image: {
-    width: 70,
-    height: 98, // standard card ratio is about 5:7
+    width: 76,
+    height: 106,
+    borderRadius: 6,
   },
 });

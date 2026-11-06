@@ -1,22 +1,21 @@
 import { Stack } from "expo-router";
-import { LinearGradient } from 'expo-linear-gradient';
+import { StatusBar } from "expo-status-bar";
 
 export default function RootLayout() {
   return (
-    <Stack screenOptions={{ 
-      headerTransparent: false,
-      headerBackground: () => (
-        <LinearGradient
-          colors={['#000', '#0B6623']}
-          style={{ flex: 1 }}
-          start={{ x: 0, y: 0 }}
-          end={{ x: 0, y: 1 }}
-        />
-      ),
-      headerTintColor: 'white' 
-    }}>
-      <Stack.Screen name="index" options={{ title: "Blackjack" }} />
-      <Stack.Screen name="game" options={{ title: "Game" }} />
-    </Stack>
+    <>
+      <StatusBar style="light" />
+      <Stack screenOptions={{
+        headerBackButtonDisplayMode: 'minimal',
+        headerTransparent: false,
+        headerStyle: { backgroundColor: '#0B6623' },
+        headerTintColor: 'white',
+        headerTitleStyle: { fontWeight: "bold" },
+        headerShadowVisible: false,
+      }}>
+        <Stack.Screen name="index" options={{ title: "Blackjack", headerShown: false }} />
+        <Stack.Screen name="game" options={{ title: "Table" }} />
+      </Stack>
+    </>
   );
 }

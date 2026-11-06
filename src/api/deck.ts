@@ -1,13 +1,10 @@
-// Wrapper around the Deck of Cards API: https://deckofcardsapi.com/
 const BASE_URL = "https://deckofcardsapi.com/api/deck";
 
-// ---- Types that match the API's JSON responses ----
-
 export type Card = {
-  code: string; // e.g. "KH"
-  image: string; // PNG url
-  value: string; // "2".."10", "JACK", "QUEEN", "KING", "ACE"
-  suit: string; // "HEARTS", "SPADES", ...
+  code: string;
+  image: string;
+  value: string;
+  suit: string;
 };
 
 type NewDeckResponse = {
@@ -23,8 +20,6 @@ type DrawResponse = {
   cards: Card[];
   remaining: number;
 };
-
-// ---- Example (complete): create a new shuffled deck ----
 
 export async function createDeck(): Promise<string> {
   const response = await fetch(`${BASE_URL}/new/shuffle/?deck_count=1`);
