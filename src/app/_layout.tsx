@@ -1,18 +1,22 @@
-import { DarkTheme, DefaultTheme, ThemeProvider } from 'expo-router';
-import * as SplashScreen from 'expo-splash-screen';
-import { useColorScheme } from 'react-native';
+import { Stack } from "expo-router";
+import { LinearGradient } from 'expo-linear-gradient';
 
-import { AnimatedSplashOverlay } from '@/components/animated-icon';
-import AppTabs from '@/components/app-tabs';
-
-SplashScreen.preventAutoHideAsync();
-
-export default function TabLayout() {
-  const colorScheme = useColorScheme();
+export default function RootLayout() {
   return (
-    <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-      <AnimatedSplashOverlay />
-      <AppTabs />
-    </ThemeProvider>
+    <Stack screenOptions={{ 
+      headerTransparent: false,
+      headerBackground: () => (
+        <LinearGradient
+          colors={['#000', '#0B6623']}
+          style={{ flex: 1 }}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 0, y: 1 }}
+        />
+      ),
+      headerTintColor: 'white' 
+    }}>
+      <Stack.Screen name="index" options={{ title: "Blackjack" }} />
+      <Stack.Screen name="game" options={{ title: "Game" }} />
+    </Stack>
   );
 }
