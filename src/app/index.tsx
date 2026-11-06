@@ -14,6 +14,11 @@ export default function HomeScreen() {
     router.push("/game");
   };
 
+  const openRules = () => {
+    Haptics.selectionAsync();
+    router.push("/rules");
+  };
+
   return (
     <LinearGradient
       colors={[COLORS.feltLight, COLORS.feltDark]}
@@ -25,7 +30,10 @@ export default function HomeScreen() {
         <View style={styles.divider} />
         <Text style={styles.subtitle}>Get as close to 21 as you can without going over.</Text>
       </View>
-      <CustomButton title="Play" onPress={startGame} wide />
+      <View style={styles.actions}>
+        <CustomButton title="Play" onPress={startGame} wide />
+        <CustomButton title="How to Play" onPress={openRules} variant="outlined" wide />
+      </View>
     </LinearGradient>
   );
 }
@@ -59,6 +67,10 @@ const styles = StyleSheet.create({
     borderRadius: 2,
     backgroundColor: COLORS.gold,
     marginVertical: 16,
+  },
+  actions: {
+    alignItems: "center",
+    gap: 12,
   },
   subtitle: {
     fontSize: 16,

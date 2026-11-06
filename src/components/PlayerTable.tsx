@@ -25,7 +25,12 @@ export default function PlayerTable({ player, hand, phase }: Props) {
             </View>
             <View style={styles.hand}>
                 {hand.map((card, i) => (
-                    <PlayingCard key={card.code} card={card} hidden={hideDealerCard && i === 1} />
+                    <PlayingCard
+                        key={card.code}
+                        card={card}
+                        hidden={hideDealerCard && i === 1}
+                        overlap={i > 0}
+                    />
                 ))}
             </View>
         </View>
@@ -68,7 +73,7 @@ const styles = StyleSheet.create({
     },
     hand: {
         flexDirection: "row",
-        flexWrap: "wrap",
+        flexWrap: "nowrap",
         justifyContent: "center",
         minHeight: 114,
     },

@@ -6,18 +6,21 @@ type Props = {
     onPress: () => void;
     wide?: boolean;
     variant?: "filled" | "outlined"
+    disabled?: boolean;
 };
 
-export default function CustomButton({ title, onPress, wide = false, variant = "filled" }: Props) {
+export default function CustomButton({ title, onPress, wide = false, variant = "filled", disabled = false }: Props) {
     const outlined = variant === "outlined";
 
     return (
         <Pressable
             onPress={onPress}
+            disabled={disabled}
             style={({ pressed }) => [
                 outlined ? styles.buttonOutline : styles.button,
                 wide && styles.wide,
                 pressed && (outlined ? styles.outlinePressed : styles.buttonPressed),
+                disabled && styles.disabled,
             ]}
         >
             <Text style={outlined ? styles.outlineText : styles.buttonText}>{title}</Text>
@@ -60,5 +63,8 @@ const styles = StyleSheet.create({
     },
     wide: {
         width: 220,
+    },
+    disabled: {
+        opacity: 0.5,
     },
 })

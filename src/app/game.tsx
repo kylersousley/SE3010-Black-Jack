@@ -20,6 +20,7 @@ export default function GameScreen() {
   const [phase, setPhase] = useState<Phase>("loading");
   const [outcome, setOutcome] = useState<Outcome | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [busy, setBusy] = useState(false);
 
   const background = [COLORS.feltLight, COLORS.feltDark] as const;
 
@@ -35,7 +36,8 @@ export default function GameScreen() {
   }, [deckId])
 
   async function startRound() {
-    if (deckId) {
+    if (deckId && !busy) {
+      setBusy(true);
       try {
         await reshuffleDeck(deckId)
         const cards = await drawCards(deckId, 4);
@@ -49,6 +51,8 @@ export default function GameScreen() {
         
       } catch (e) {
         setError(String(e));
+      } finally {
+        setBusy(false);
       }
     } else {
       return;
@@ -61,7 +65,8 @@ export default function GameScreen() {
   }
 
   async function hit() {
-    if (deckId) {
+    if (deckId && !busy) {
+      setBusy(true);
       try {
         Haptics.selectionAsync();
         const card = await drawCards(deckId, 1)
@@ -74,12 +79,15 @@ export default function GameScreen() {
           } 
         } catch(e) {
           setError(String(e))
+      } finally {
+        setBusy(false);
       }
     }
   }
 
   async function stand() {
-    if (deckId) {
+    if (deckId && !busy) {
+      setBusy(true);
       try {
         Haptics.selectionAsync();
         let dealer = [...dealerHand]
@@ -92,6 +100,8 @@ export default function GameScreen() {
         setPhase("done")
       } catch (e) {
         setError(String(e))
+      } finally {
+        setBusy(false);
       }
     }
   }
@@ -126,11 +136,11 @@ export default function GameScreen() {
       <View style={styles.controls}>
         {phase === "playing" ? (
           <>
-          <CustomButton title="Hit" onPress={hit} />
-          <CustomButton title="Stand" onPress={stand} variant="outlined" />
+          <CustomButton title="Hit" onPress={hit} disabled={busy} />
+          <CustomButton title="Stand" onPress={stand} variant="outlined" disabled={busy} />
           </>
         ) : (
-          <CustomButton title="Deal Again" onPress={dealAgain} wide />
+          <CustomButton title="Deal Again" onPress={dealAgain} wide disabled={busy} />
         )}
       </View>
     </LinearGradient>
